@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 import com.uts.sekolah.sekolah.Dto.KelasMataPelajaranDto;
 import com.uts.sekolah.sekolah.Dto.ResponseData;
 import com.uts.sekolah.sekolah.Model.Kelas;
@@ -52,10 +52,6 @@ public class KelasMataPelajaranController {
         return ResponseEntity.ok(iOptional.get());
     }
 
-    @GetMapping("/find-all-by-id-kelas/{id}")
-    public Object findAllByIdKelas(@PathVariable int Id){
-        return kelasMataPelajaranRepository.findKelasMataPelajaranByKelasId(Id);
-    }
 
     @PostMapping("/post")
     public Object post(@Valid @RequestBody KelasMataPelajaranDto kelasMataPelajaranDto, Errors errors) {

@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.uts.sekolah.sekolah.Dto.KelasDto;
 import com.uts.sekolah.sekolah.Dto.ResponseData;
+import com.uts.sekolah.sekolah.Model.Guru;
 import com.uts.sekolah.sekolah.Model.Kelas;
+import com.uts.sekolah.sekolah.Repositories.GuruRepository;
 import com.uts.sekolah.sekolah.Repositories.KelasRepository;
 
 @RestController
@@ -30,6 +32,8 @@ import com.uts.sekolah.sekolah.Repositories.KelasRepository;
 public class KelasController {
     @Autowired
     KelasRepository kelasRepository;
+    @Autowired
+    GuruRepository guruRepository;
 
     @GetMapping("/find-all")
     public Iterable<Kelas> findAll() {
@@ -68,17 +72,20 @@ public class KelasController {
     public Object post(@Valid @RequestBody KelasDto kelasDto, Errors errors) {
         ResponseData<Kelas> responseData = new ResponseData<>();
         Optional<Kelas> nOptional = kelasRepository.findKelasByNamaKelas(kelasDto.getNamaKelas());
-        if (errors.hasErrors() || nOptional.isPresent()) {
+        Optional<Guru> guru = guruRepository.findById(kelasDto.getIdGuru());
+        if (errors.hasErrors() || nOptional.isPresent()||guru.isEmpty()) {
             for (ObjectError error : errors.getAllErrors()) {
                 responseData.getMessage().add(error.getDefaultMessage());
             }
             responseData.getMessage().add(nOptional.isPresent() ? "Nama Kelas Sudah Ada" : null);
+            responseData.getMessage().add(guru.isEmpty() ? "Id Guru TIdak Ada" : null);
             responseData.getMessage().removeAll(Collections.singleton(null));
             responseData.setStatus(false);
             responseData.setPayload(null);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
         }
         Kelas kelas = new Kelas();
+        kelas.setGuru(guru.get());
         kelas.setNamaKelas(kelasDto.getNamaKelas());
         responseData.getMessage().add("Succes");
         responseData.setStatus(true);
@@ -91,13 +98,15 @@ public class KelasController {
     public Object put(@Valid @RequestBody KelasDto kelasDto, Errors errors, @PathVariable int id) {
         ResponseData<Kelas> responseData = new ResponseData<>();
         Optional<Kelas> iOptional = kelasRepository.findById(id);
+        Optional<Guru> guru = guruRepository.findById(kelasDto.getIdGuru());
         Optional<Kelas> nOptional = kelasRepository.findKelasByNamaKelas(kelasDto.getNamaKelas());
-        if (iOptional.isEmpty() || errors.hasErrors()||nOptional.isPresent()) {
+        if (iOptional.isEmpty() || errors.hasErrors() || nOptional.isPresent()||guru.isEmpty()) {
             for (ObjectError error : errors.getAllErrors()) {
                 responseData.getMessage().add(error.getDefaultMessage());
             }
-            responseData.getMessage().add(nOptional.isPresent()?"Kelas Sudah Ada":null);
+            responseData.getMessage().add(nOptional.isPresent() ? "Kelas Sudah Ada" : null);
             responseData.getMessage().add(iOptional.isEmpty() ? "Id Tidak Ditemukan" : null);
+            responseData.getMessage().add(guru.isEmpty() ? "Id Guru TIdak Ada" : null);
             responseData.getMessage().removeAll(Collections.singleton(null));
             responseData.setStatus(false);
             responseData.setPayload(null);
@@ -105,6 +114,7 @@ public class KelasController {
 
         }
         Kelas kelas = iOptional.get();
+        kelas.setGuru(guru.get());
         kelas.setNamaKelas(kelasDto.getNamaKelas());
         responseData.getMessage().add("Succes");
         responseData.setStatus(true);
@@ -113,9 +123,9 @@ public class KelasController {
     }
 
     @DeleteMapping("/delete-by-id/{id}")
-    public Object deleteById(@PathVariable int id){
+    public Object deleteById(@PathVariable int id) {
         Optional<Kelas> iOptional = kelasRepository.findById(id);
-        if(iOptional.isEmpty()){
+        if (iOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Data Tidak Ditemukan");
         }
         kelasRepository.deleteById(id);
@@ -123,9 +133,9 @@ public class KelasController {
     }
 
     @DeleteMapping("/delete-by-nama/{nama}")
-    public Object deleteByNama(@PathVariable String nama){
+    public Object deleteByNama(@PathVariable String nama) {
         Optional<Kelas> nOptional = kelasRepository.findKelasByNamaKelas(nama);
-        if(nOptional.isEmpty()){
+        if (nOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Data Tidak Ditemukan");
         }
         kelasRepository.deleteById(nOptional.get().getId());

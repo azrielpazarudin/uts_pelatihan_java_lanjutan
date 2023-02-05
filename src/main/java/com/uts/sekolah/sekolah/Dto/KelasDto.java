@@ -10,7 +10,8 @@ import lombok.Data;
 @Data
 public class KelasDto {
     @JsonProperty("kelas")
-    @Size(min = 10, max = 12)
+    @Size(min = 9, max = 12)
     @NotEmpty(message = "Nama Kelas Tidak Boleh Kosong")
     private String namaKelas;
+    private int idGuru;
 }

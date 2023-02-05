@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="eskul_siswa")
-public class EskulSiswa {
+public class EkskulSiswa {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     int id;
